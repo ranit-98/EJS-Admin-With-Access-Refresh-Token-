@@ -1,0 +1,202 @@
+
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="/records/new" class="btn btn-gradient btn-sm">
+                <i class="bi bi-plus-circle me-1"></i>New Record
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Records
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            <%= stats.totalRecords %>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-file-earmark-text fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Pending Records
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            <%= stats.pendingRecords %>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-clock fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Completed Records
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            <%= stats.completedRecords %>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-check-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <% if (user.role === 'admin') { %>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Users
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                <%= stats.totalUsers %>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<!-- Recent Records -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-clock-history me-2"></i>Recent Records
+                </h6>
+                <a href="/records" class="btn btn-outline-primary btn-sm">
+                    View All <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="card-body">
+                <% if (recentRecords.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Created By</th>
+                                    <th>Assigned To</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% recentRecords.forEach(record => { %>
+                                    <tr>
+                                        <td>
+                                            <a href="/records/<%= record._id %>" class="text-decoration-none">
+                                                <%= record.title %>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<%= record.status === 'completed' ? 'success' : record.status === 'in_progress' ? 'warning' : 'secondary' %>">
+                                                <%= record.status.replace('_', ' ').toUpperCase() %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<%= record.priority === 'high' ? 'danger' : record.priority === 'medium' ? 'warning' : 'info' %>">
+                                                <%= record.priority.toUpperCase() %>
+                                            </span>
+                                        </td>
+                                        <td><%= record.createdBy?.username || 'Unknown' %></td>
+                                        <td><%= record.assignedTo?.username || 'Unassigned' %></td>
+                                        <td><%= new Date(record.createdAt).toLocaleDateString() %></td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="/records/<%= record._id %>" class="btn btn-outline-primary btn-sm">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <% if (user.role === 'admin' || user.role === 'manager' || record.createdBy._id.toString() === user.id) { %>
+                                                    <a href="/records/<%= record._id %>/edit" class="btn btn-outline-secondary btn-sm">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-4">
+                        <i class="bi bi-inbox display-4 text-muted"></i>
+                        <p class="text-muted mt-2">No records found</p>
+                        <a href="/records/new" class="btn btn-gradient">
+                            <i class="bi bi-plus-circle me-1"></i>Create First Record
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+    .text-xs {
+        font-size: 0.7rem;
+    }
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+</style>

@@ -1,0 +1,546 @@
+
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>User Management</h2>
+        <div class="d-flex align-items-center">
+            <span class="text-muted me-3">Total Users: <%= pagination.totalUsers %></span>
+        </div>
+    </div>
+
+    <% if (message) { %>
+        <div class="alert alert-<%= messageType === 'error' ? 'danger' : messageType %> alert-dismissible fade show">
+            <%= message %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+
+    <!-- Filters Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filters</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="role" class="form-label">Role</label>
+                    <select class="form-select" id="role" name="role">
+                        <option value="">All Roles</option>
+                        <option value="admin" <%= filters.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                        <option value="manager" <%= filters.role === 'manager' ? 'selected' : '' %>>Manager</option>
+                        <option value="employee" <%= filters.role === 'employee' ? 'selected' : '' %>>Employee</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="isActive" class="form-label">Status</label>
+                    <select class="form-select" id="isActive" name="isActive">
+                        <option value="">All Status</option>
+                        <option value="true" <%= filters.isActive === 'true' ? 'selected' : '' %>>Active</option>
+                        <option value="false" <%= filters.isActive === 'false' ? 'selected' : '' %>>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search"></i> Apply Filters
+                    </button>
+                    <a href="/users" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Users Table Card -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-users"></i> Users List</h5>
+        </div>
+        <div class="card-body">
+            <% if (users.length === 0) { %>
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No users found</h5>
+                    <p class="text-muted">Try adjusting your filters or check back later.</p>
+                </div>
+            <% } else { %>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">
+                                    <i class="fas fa-user"></i> User
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-envelope"></i> Email
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-user-tag"></i> Role
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-toggle-on"></i> Status
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-clock"></i> Last Login
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-calendar"></i> Joined
+                                </th>
+                                <!-- <th scope="col" class="text-center">
+                                    <i class="fas fa-cogs"></i> Actions
+                                </th> -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(user => { %>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-2">
+                                                <%= user.username.charAt(0).toUpperCase() %>
+                                            </div>
+                                            <div>
+                                                <strong><%= user.username %></strong>
+                                                <% if (user._id.toString() === locals.user.id) { %>
+                                                    <span class="badge bg-info ms-1">You</span>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted"><%= user.email %></span>
+                                    </td>
+                                    <td>
+                                        <span class="badge fs-6 bg-<%= user.role === 'admin' ? 'danger' : user.role === 'manager' ? 'warning text-dark' : 'primary' %>">
+                                            <i class="fas fa-<%= user.role === 'admin' ? 'crown' : user.role === 'manager' ? 'user-tie' : 'user' %>"></i>
+                                            <%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge fs-6 bg-<%= user.isActive ? 'success' : 'secondary' %>">
+                                            <i class="fas fa-<%= user.isActive ? 'check-circle' : 'times-circle' %>"></i>
+                                            <%= user.isActive ? 'Active' : 'Inactive' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <% if (user.lastLogin) { %>
+                                            <span class="text-muted">
+                                                <%= new Date(user.lastLogin).toLocaleDateString() %>
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">
+                                                <%= new Date(user.lastLogin).toLocaleTimeString() %>
+                                            </small>
+                                        <% } else { %>
+                                            <span class="text-muted">Never</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">
+                                            <%= new Date(user.createdAt).toLocaleDateString() %>
+                                        </span>
+                                    </td>
+                                    <!-- <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="/users/<%= user._id %>" 
+                                               class="btn btn-outline-primary" 
+                                               title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <% if (user._id.toString() !== locals.user.id) { %>
+                                                <button type="button" 
+                                                        class="btn btn-outline-warning" 
+                                                        title="Change Role"
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#roleModal<%= user._id %>">
+                                                    <i class="fas fa-user-cog"></i>
+                                                </button>
+                                                <form action="/users/<%= user._id %>/toggle-status" method="POST" class="d-inline">
+                                                    <button type="submit" 
+                                                            class="btn btn-outline-<%= user.isActive ? 'danger' : 'success' %>" 
+                                                            title="<%= user.isActive ? 'Deactivate' : 'Activate' %> User"
+                                                            onclick="return confirm('Are you sure you want to <%= user.isActive ? 'deactivate' : 'activate' %> this user?');">
+                                                        <i class="fas fa-<%= user.isActive ? 'user-slash' : 'user-check' %>"></i>
+                                                    </button>
+                                                </form>
+                                            <% } %>
+                                        </div>
+                                    </td> -->
+                                </tr>
+
+                                <!-- Role Change Modal for each user -->
+                                <% if (user._id.toString() !== locals.user.id) { %>
+                                <div class="modal fade" id="roleModal<%= user._id %>" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">
+                                                    <i class="fas fa-user-cog"></i> Change Role for <%= user.username %>
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form action="/users/<%= user._id %>/role" method="POST">
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label for="role<%= user._id %>" class="form-label">Select New Role</label>
+                                                        <select class="form-select" id="role<%= user._id %>" name="role" required>
+                                                            <option value="employee" <%= user.role === 'employee' ? 'selected' : '' %>>
+                                                                <i class="fas fa-user"></i> Employee
+                                                            </option>
+                                                            <option value="manager" <%= user.role === 'manager' ? 'selected' : '' %>>
+                                                                <i class="fas fa-user-tie"></i> Manager
+                                                            </option>
+                                                            <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>
+                                                                <i class="fas fa-crown"></i> Admin
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="alert alert-warning">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                        <strong>Warning:</strong> Changing the user's role will log them out from all devices.
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                        <i class="fas fa-times"></i> Cancel
+                                                    </button>
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-save"></i> Update Role
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <% if (pagination.totalPages > 1) { %>
+                    <nav aria-label="Users pagination" class="mt-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                Showing <%= ((pagination.currentPage - 1) * 10) + 1 %> to 
+                                <%= Math.min(pagination.currentPage * 10, pagination.totalUsers) %> 
+                                of <%= pagination.totalUsers %> users
+                            </div>
+                            <ul class="pagination mb-0">
+                                <% if (pagination.hasPrev) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= pagination.currentPage - 1 %>&role=<%= filters.role || '' %>&isActive=<%= filters.isActive || '' %>">
+                                            <i class="fas fa-chevron-left"></i> Previous
+                                        </a>
+                                    </li>
+                                <% } %>
+                                
+                                <% 
+                                let startPage = Math.max(1, pagination.currentPage - 2);
+                                let endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+                                %>
+                                
+                                <% if (startPage > 1) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1&role=<%= filters.role || '' %>&isActive=<%= filters.isActive || '' %>">1</a>
+                                    </li>
+                                    <% if (startPage > 2) { %>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    <% } %>
+                                <% } %>
+                                
+                                <% for (let i = startPage; i <= endPage; i++) { %>
+                                    <li class="page-item <%= i === pagination.currentPage ? 'active' : '' %>">
+                                        <a class="page-link" href="?page=<%= i %>&role=<%= filters.role || '' %>&isActive=<%= filters.isActive || '' %>">
+                                            <%= i %>
+                                        </a>
+                                    </li>
+                                <% } %>
+                                
+                                <% if (endPage < pagination.totalPages) { %>
+                                    <% if (endPage < pagination.totalPages - 1) { %>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    <% } %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= pagination.totalPages %>&role=<%= filters.role || '' %>&isActive=<%= filters.isActive || '' %>">
+                                            <%= pagination.totalPages %>
+                                        </a>
+                                    </li>
+                                <% } %>
+                                
+                                <% if (pagination.hasNext) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= pagination.currentPage + 1 %>&role=<%= filters.role || '' %>&isActive=<%= filters.isActive || '' %>">
+                                            Next <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                <% } %>
+                            </ul>
+                        </div>
+                    </nav>
+                <% } %>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.badge.fs-6 {
+    font-size: 0.875rem !important;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.pagination .page-link {
+    color: #007bff;
+    border: 1px solid #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #fff;
+    border-color: #dee2e6;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group-sm > .btn {
+        padding: 0.125rem 0.25rem;
+        font-size: 0.75rem;
+    }
+    
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+    
+    .badge.fs-6 {
+        font-size: 0.75rem !important;
+    }
+}
+
+/* Custom scrollbar for table */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Hover effects */
+.table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-warning:hover,
+.btn-outline-success:hover,
+.btn-outline-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+/* Modal improvements */
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Alert improvements */
+.alert {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Card improvements */
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.card-header h5 {
+    color: #495057;
+    font-weight: 600;
+}
+
+/* Filter section improvements */
+.card-body .row.g-3 {
+    align-items: end;
+}
+
+/* Status and role badge improvements */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Loading state for buttons */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive text */
+@media (max-width: 576px) {
+    .d-flex.justify-content-between.align-items-center {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+    
+    .text-muted.me-3 {
+        margin-right: 0 !important;
+    }
+    
+    .pagination {
+        font-size: 0.875rem;
+    }
+    
+    .modal-dialog {
+        margin: 1rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .btn, .pagination, .modal, .alert {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+    
+    .table {
+        font-size: 12px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }, 5000);
+    });
+
+    // Confirm before status toggle
+    const statusForms = document.querySelectorAll('form[action*="/toggle-status"]');
+    statusForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const isActive = this.querySelector('button i').classList.contains('fa-user-slash');
+            const action = isActive ? 'deactivate' : 'activate';
+            const username = this.closest('tr').querySelector('strong').textContent;
+            
+            if (!confirm(`Are you sure you want to ${action} user "${username}"?`)) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Role change confirmation
+    const roleForms = document.querySelectorAll('form[action*="/role"]');
+    roleForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const newRole = this.querySelector('select[name="role"]').value;
+            const username = this.closest('.modal').querySelector('.modal-title').textContent.split(' for ')[1];
+            
+            if (!confirm(`Are you sure you want to change ${username}'s role to ${newRole}? This will log them out from all devices.`)) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Search functionality (if you want to add client-side search)
+    const searchInput = document.getElementById('userSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll('tbody tr');
+            
+            tableRows.forEach(row => {
+                const username = row.querySelector('strong').textContent.toLowerCase();
+                const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                
+                if (username.includes(searchTerm) || email.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
+
+

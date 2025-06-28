@@ -1,0 +1,133 @@
+
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Record Details</h4>
+                    <div class="btn-group">
+                        <% if (user.role === 'admin' || user.role === 'manager' || record.createdBy._id.toString() === user.id) { %>
+                            <a href="/records/<%= record._id %>/edit" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                        <% } %>
+                        <% if (user.role === 'admin' || record.createdBy._id.toString() === user.id) { %>
+                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Title:</strong></div>
+                        <div class="col-sm-9"><%= record.title %></div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Description:</strong></div>
+                        <div class="col-sm-9"><%= record.description %></div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Status:</strong></div>
+                        <div class="col-sm-9">
+                            <span class="badge bg-<%= record.status === 'completed' ? 'success' : record.status === 'in-progress' ? 'warning' : record.status === 'cancelled' ? 'danger' : 'secondary' %>">
+                                <%= record.status.charAt(0).toUpperCase() + record.status.slice(1) %>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Priority:</strong></div>
+                        <div class="col-sm-9">
+                            <span class="badge bg-<%= record.priority === 'urgent' ? 'danger' : record.priority === 'high' ? 'warning' : record.priority === 'medium' ? 'info' : 'secondary' %>">
+                                <%= record.priority.charAt(0).toUpperCase() + record.priority.slice(1) %>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Created By:</strong></div>
+                        <div class="col-sm-9">
+                            <%= record.createdBy.username %> 
+                            <small class="text-muted">(<%= record.createdBy.email %>)</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Assigned To:</strong></div>
+                        <div class="col-sm-9">
+                            <%= record.assignedTo.username %> 
+                            <small class="text-muted">(<%= record.assignedTo.email %>)</small>
+                        </div>
+                    </div>
+                    
+                    <% if (record.dueDate) { %>
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Due Date:</strong></div>
+                        <div class="col-sm-9">
+                            <%= new Date(record.dueDate).toLocaleDateString() %>
+                            <% if (new Date(record.dueDate) < new Date() && record.status !== 'completed') { %>
+                                <span class="badge bg-danger ms-2">Overdue</span>
+                            <% } %>
+                        </div>
+                    </div>
+                    <% } %>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Created:</strong></div>
+                        <div class="col-sm-9"><%= new Date(record.createdAt).toLocaleString() %></div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-sm-3"><strong>Last Updated:</strong></div>
+                        <div class="col-sm-9"><%= new Date(record.updatedAt).toLocaleString() %></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/records" class="btn btn-outline-primary">
+                            <i class="fas fa-list"></i> Back to Records
+                        </a>
+                        <a href="/records/new" class="btn btn-outline-success">
+                            <i class="fas fa-plus"></i> Create New Record
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this record? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="/records/<%= record._id %>/delete" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+

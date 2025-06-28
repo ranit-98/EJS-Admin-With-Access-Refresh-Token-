@@ -1,0 +1,49 @@
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 text-center">
+            <div class="error-page">
+                <h1 class="display-1 text-muted"><%= error.status || 500 %></h1>
+                <h2 class="mb-4">
+                    <% if (error.status === 404) { %>
+                        Page Not Found
+                    <% } else if (error.status === 403) { %>
+                        Access Denied
+                    <% } else { %>
+                        Something Went Wrong
+                    <% } %>
+                </h2>
+                <p class="lead mb-4"><%= error.message || 'An unexpected error occurred' %></p>
+                
+                <div class="error-actions">
+                    <a href="/dashboard" class="btn btn-primary me-3">
+                        <i class="fas fa-home"></i> Go Home
+                    </a>
+                    <button onclick="history.back()" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Go Back
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    padding: 2rem 0;
+}
+
+.display-1 {
+    font-size: 6rem;
+    font-weight: 300;
+}
+
+@media (max-width: 768px) {
+    .display-1 {
+        font-size: 4rem;
+    }
+}
+</style>
+
+

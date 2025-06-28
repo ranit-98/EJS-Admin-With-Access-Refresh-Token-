@@ -1,0 +1,127 @@
+
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">My Profile</h4>
+                </div>
+                <div class="card-body">
+                    <% if (message) { %>
+                        <div class="alert alert-<%= messageType === 'error' ? 'danger' : messageType %> alert-dismissible fade show">
+                            <%= message %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <% } %>
+
+                    <div class="row mb-4">
+                        <div class="col-sm-3"><strong>Username:</strong></div>
+                        <div class="col-sm-9"><%= profileUser.username %></div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-sm-3"><strong>Email:</strong></div>
+                        <div class="col-sm-9"><%= profileUser.email %></div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-sm-3"><strong>Role:</strong></div>
+                        <div class="col-sm-9">
+                            <span class="badge bg-<%= profileUser.role === 'admin' ? 'danger' : profileUser.role === 'manager' ? 'warning' : 'primary' %>">
+                                <%= profileUser.role.charAt(0).toUpperCase() + profileUser.role.slice(1) %>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-sm-3"><strong>Status:</strong></div>
+                        <div class="col-sm-9">
+                            <span class="badge bg-<%= profileUser.isActive ? 'success' : 'secondary' %>">
+                                <%= profileUser.isActive ? 'Active' : 'Inactive' %>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-sm-3"><strong>Last Login:</strong></div>
+                        <div class="col-sm-9">
+                            <%= profileUser.lastLogin ? new Date(profileUser.lastLogin).toLocaleString() : 'Never' %>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-sm-3"><strong>Member Since:</strong></div>
+                        <div class="col-sm-9"><%= new Date(profileUser.createdAt).toLocaleDateString() %></div>
+                    </div>
+
+                    <hr>
+
+                    <h5 class="mb-3">Change Password</h5>
+                    <form action="/profile/change-password" method="POST">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="currentPassword" class="form-label">Current Password</label>
+                                    <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">New Password</label>
+                                    <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                                    <div class="form-text">Password must be at least 6 characters long.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Account Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/dashboard" class="btn btn-outline-primary">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                        <a href="/records" class="btn btn-outline-info">
+                            <i class="fas fa-file-alt"></i> My Records
+                        </a>
+                        <% if (profileUser.role === 'admin') { %>
+                            <a href="/users" class="btn btn-outline-warning">
+                                <i class="fas fa-users"></i> Manage Users
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Security Notice</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small text-muted">
+                        Changing your password will log you out from all devices. You'll need to log in again with your new password.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
