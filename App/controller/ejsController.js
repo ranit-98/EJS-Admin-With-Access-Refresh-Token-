@@ -270,6 +270,8 @@ const dashboard = async (req, res) => {
 //--------------------------------------------------------------------------------------
 //                            Records Management
 //--------------------------------------------------------------------------------------
+
+
 const recordsList = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -278,26 +280,46 @@ const recordsList = async (req, res) => {
     const status = req.query.status;
     const priority = req.query.priority;
 
-    // Build filter
-    const filter = { isActive: true };
-    if (status) filter.status = status;
-    if (priority) filter.priority = priority;
+    const match = { isActive: true };
+    if (status) match.status = status;
+    if (priority) match.priority = priority;
 
-    // Non-admins can only see their own records
     if (req.user.role !== "admin") {
-      filter.$or = [{ createdBy: req.user.id }, { assignedTo: req.user.id }];
+      match.$or = [
+        { createdBy: req.user.id },
+        { assignedTo: req.user.id }
+      ];
     }
 
-    const [records, total, users] = await Promise.all([
-      Record.find(filter)
-        .populate("createdBy", "username email")
-        .populate("assignedTo", "username email")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      Record.countDocuments(filter),
-      User.find({ isActive: true }, "username email") // Only fetch active users
-    ]);
+    const aggregatePipeline = [
+      { $match: match },
+      {
+        $lookup: {
+          from: "users", 
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "createdByUser"
+        }
+      },
+      { $unwind: "$createdByUser" },
+      {
+        $lookup: {
+          from: "users",
+          localField: "assignedTo",
+          foreignField: "_id",
+          as: "assignedToUser"
+        }
+      },
+      { $unwind: "$assignedToUser" },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit }
+    ];
+
+    const records = await Record.aggregate(aggregatePipeline);
+
+    const total = await Record.countDocuments(match);
+    const users = await User.find({ isActive: true }, "username email");
 
     res.render("records/list", {
       title: "Records",
@@ -315,7 +337,6 @@ const recordsList = async (req, res) => {
       messageType: req.query.type || "info",
       user: req.user
     });
-
   } catch (error) {
     console.error("Records list error:", error);
     res.render("error", {
@@ -607,6 +628,7 @@ const usersList = async (req, res) => {
   }
 };
 
+
 const viewUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -622,16 +644,28 @@ const viewUser = async (req, res) => {
       });
     }
 
-    // Get user's records count
-    const recordsCount = await Record.countDocuments({
-      $or: [{ createdBy: id }, { assignedTo: id }],
-      isActive: true,
-    });
+    const records = await Record.aggregate([
+      {
+        $match: {
+          $or: [{ createdBy: user._id }, { assignedTo: user._id }],
+          isActive: true
+        }
+      },
+      {
+        $project: {
+          title: 1,
+          status: 1,
+          priority: 1,
+          createdAt: 1
+        }
+      }
+    ]);
 
     res.render("users/view", {
       title: "View User",
       viewUser: user,
-      recordsCount,
+      records,
+      recordsCount: records.length,
       message: req.query.message || null,
       messageType: req.query.type || "info",
     });
